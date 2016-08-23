@@ -18,6 +18,19 @@ IGNORE_LINES = '['
 SNIPPET_MARGIN_BEFORE = 0.2 # seconds
 SNIPPET_MARGIN_AFTER = 0.1 # seconds
 
+#
+# Helpers
+#
+
+def chunks(l, n):
+    '''Yield successive n-sized chunks from l.'''
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+#
+# Steps
+#
+
 def rescan_dir():
     db_movies = [m.title for m in Movie.select(Movie.title)]
 
@@ -121,21 +134,22 @@ def create_snippets():
                 raise
 
         # create audio snippets for each line
-
         bar = progressbar.ProgressBar()
-        for line in bar(movie.lines):
-    
+        for group in bar(list(chunks(movie.lines, 64))):
             command = [FFMPEG_BIN,
                        '-i', movie.video,
-                       '-ss', '%.2f' % (line.start - SNIPPET_MARGIN_BEFORE),
-                       '-t', '%.2f' % (line.duration + SNIPPET_MARGIN_BEFORE \
-                                       + SNIPPET_MARGIN_AFTER),
-                       '-vn', 
                        '-loglevel', 'panic',
-                       '-acodec', 'copy', os.path.join(path, '%i.aac' % line.id)
                        ]
 
-            subprocess.check_output( command )
+            for line in group:
+                command += [
+                    '-ss', '%.2f' % (line.start - SNIPPET_MARGIN_BEFORE),
+                    '-t', '%.2f' % (line.duration + SNIPPET_MARGIN_BEFORE \
+                                    + SNIPPET_MARGIN_AFTER),
+                    '-vn', 
+                    '-acodec', 'copy', os.path.join(path, '%i.aac' % line.id)
+                    ]
+            subprocess.check_output (command)
         
     movie.lines_complete = True
     movie.save()
