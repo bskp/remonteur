@@ -1,4 +1,4 @@
 #!/usr/bin/env python
 
-import db
-db.db.create_tables([db.Movie, db.Line])
+import schema
+schema.db.create_tables([schema.Movie, schema.Line])
