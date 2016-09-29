@@ -1,5 +1,8 @@
 *.swp
 *.pyc
 env/
-movies/
+movies*/
 __pycache__
+node_modules
+.sync
+dist/

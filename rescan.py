@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import subprocess
 import progressbar
 
@@ -15,7 +16,8 @@ from scipy import stats as st
 import amfm_decompy.pYAAPT as pYAAPT
 import amfm_decompy.basic_tools as basic
 
-from schema import db, Line, Movie
+from schema import Line, Movie, db
+
 
 #
 # Configuration
@@ -23,7 +25,8 @@ from schema import db, Line, Movie
 
 FFMPEG_BIN = 'ffmpeg'
 
-MOVIES_DIR = 'movies/'
+DEFAULT_MOVIES_DIR = 'movies'
+
 SUBTITLE_EXT = '.srt'
 MOVIE_EXT = '.mkv', '.mp4', '.avi'
 
@@ -47,6 +50,15 @@ def chunks(l, n):
 # Steps
 #
 
+movies_dir = '/Volumes/Filme/filme'
+
+def parse_args():
+    global movies_dir
+    args = sys.argv()
+
+    if len(args) > 1:
+        movies_dir = args[1]
+
 
 def rescan_dir():
     ''' Sync the sqlite DB with the contents of the "movies" directory. '''
@@ -56,8 +68,8 @@ def rescan_dir():
     print "Rescanning movie directory..."
 
     # Add all new movies to DB
-    for item in os.listdir(MOVIES_DIR):
-        path = os.path.join(MOVIES_DIR, item)
+    for item in os.listdir(movies_dir):
+        path = os.path.join(movies_dir, item)
         if os.path.isfile(path):
             continue
 
@@ -102,7 +114,11 @@ def create_lines():
     for movie in Movie.select().where(Movie.skip_line == False):
 
         print "Reading subtitles for '%s'" % movie.title
-        lines = srt.open(movie.subtitles)
+        try:
+            lines = srt.open(movie.subtitles)
+        except UnicodeDecodeError:
+            print 'Non-UTF8-Subtitles. Falling back to iso-8859-1...'
+            lines = srt.open(movie.subtitles, encoding='iso-8859-1')
 
         for line in movie.lines:
             line.delete_instance()
@@ -151,7 +167,7 @@ def create_snippets():
             print "Creating audio snippets for '%s'" % movie.title
 
             # create snippet folder
-            path = os.path.join(MOVIES_DIR, movie.title, 'snippets')
+            path = os.path.join(movie.title, 'snippets')
             try:
                 os.makedirs(path)
             except OSError:
@@ -162,7 +178,12 @@ def create_snippets():
                     raise
 
             # create audio snippets for each line
+            # TODO relative pfade sichern
+            # TODO db umbauen
+
             bar = progressbar.ProgressBar()
+            target = None
+            target_ = None
             for group in bar(list(chunks(movie.lines, 32))):
                 command = [FFMPEG_BIN,
                            '-i', movie.video,
@@ -170,7 +191,11 @@ def create_snippets():
                            ]
 
                 for line in group:
+                    target_ = target
                     target = os.path.join(path, '%i' % line.start + SNIPPET_EXT )
+                    if target == target_:
+                        target = os.path.join(path, '%i' % line.start + '_' + SNIPPET_EXT )
+
                     line.audio = target
                     line.save()
                     command += [
@@ -179,7 +204,7 @@ def create_snippets():
                                         SNIPPET_MARGIN_AFTER),
                         '-vn',
                         '-ac', '1',
-                        target,
+                        _full_path(target),
                     ]
 
                 subprocess.check_output( command )
@@ -200,20 +225,22 @@ def extract_pitches():
         for line in bar( movie.lines.where(Line.pitch == None) ):
             with db.transaction():
 
-                signal = basic.SignalObj( line.audio )
-                pitch = pYAAPT.yaapt(signal)
+                try:
+                    signal = basic.SignalObj( _full_path(line.audio) )
+                    pitch = pYAAPT.yaapt(signal)
 
-                t = pitch.frames_pos / signal.fs
+                    t = pitch.frames_pos / signal.fs
 
-                # Gaussian filter
-                kern = sg.gaussian(20, 2)
-                lp = sg.filtfilt( kern, np.sum(kern), pitch.samp_interp )
-                lp[ pitch.samp_values == 0 ] = np.nan
+                    # Gaussian filter
+                    kern = sg.gaussian(20, 2)
+                    lp = sg.filtfilt( kern, np.sum(kern), pitch.samp_interp )
+                    lp[ pitch.samp_values == 0 ] = np.nan
 
-                line.pitch = np.vstack( (t, lp) )
+                    line.pitch = np.vstack( (t, lp) )
+                except Exception:
+                    line.pitch = None
+
                 line.save()
-
-                # TODO: insert pitch=False if analysis fails
 
         movie.skip_pitch = True
         movie.save()
@@ -248,10 +275,15 @@ def analyze_pitches():
                 line.save()
 
 
-rescan_dir()
-create_lines()
-create_snippets()
-extract_pitches()
-analyze_pitches()
+def _full_path(target):
+    return os.path.join(movies_dir, target)
 
-os.system('say "Filme fertig verarbeitet!"')
+if __name__ == '__main__':
+    # parse_args()
+    rescan_dir()
+    create_lines()
+    create_snippets()
+    extract_pitches()
+    analyze_pitches()
+
+    os.system('say "Filme fertig verarbeitet!"')
