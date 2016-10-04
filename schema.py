@@ -3,7 +3,7 @@ import peewee as pw
 from playhouse.fields import PickledField
 #from playhouse.sqlite_ext import FTS5Model, SearchField
 
-MOVIES_DIR = '/Volumes/Filme/filme'
+MOVIES_DIR = '/Volumes/LORA/filme'
 db = pw.SqliteDatabase(os.path.join(MOVIES_DIR, 'lines.db'))
 
 class Movie(pw.Model):

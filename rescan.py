@@ -50,7 +50,7 @@ def chunks(l, n):
 # Steps
 #
 
-movies_dir = '/Volumes/Filme/filme'
+movies_dir = '/Volumes/LORA/filme'
 
 def parse_args():
     global movies_dir
@@ -69,8 +69,10 @@ def rescan_dir():
 
     # Add all new movies to DB
     for item in os.listdir(movies_dir):
-        path = os.path.join(movies_dir, item)
-        if os.path.isfile(path):
+        abs_path = os.path.join(movies_dir, item)
+        path = item
+
+        if os.path.isfile(abs_path):
             continue
 
         if item in db_movies:
@@ -79,7 +81,7 @@ def rescan_dir():
 
         # Create new movie
 
-        files = os.listdir(path)
+        files = os.listdir(abs_path)
         subtitles = [f for f in files if f.endswith(SUBTITLE_EXT)]
         video = [f for f in files if f.endswith(MOVIE_EXT)]
 
@@ -99,6 +101,7 @@ def rescan_dir():
                          subtitles=subtitles,
                          video=video
                          )
+
         m.save()
 
     # Remove gone movies from DB
@@ -115,10 +118,10 @@ def create_lines():
 
         print "Reading subtitles for '%s'" % movie.title
         try:
-            lines = srt.open(movie.subtitles)
+            lines = srt.open(_full_path(movie.subtitles))
         except UnicodeDecodeError:
             print 'Non-UTF8-Subtitles. Falling back to iso-8859-1...'
-            lines = srt.open(movie.subtitles, encoding='iso-8859-1')
+            lines = srt.open(_full_path(movie.subtitles), encoding='iso-8859-1')
 
         for line in movie.lines:
             line.delete_instance()
@@ -167,7 +170,7 @@ def create_snippets():
             print "Creating audio snippets for '%s'" % movie.title
 
             # create snippet folder
-            path = os.path.join(movie.title, 'snippets')
+            path = os.path.join(movies_dir, movie.title, 'snippets')
             try:
                 os.makedirs(path)
             except OSError:
@@ -178,15 +181,12 @@ def create_snippets():
                     raise
 
             # create audio snippets for each line
-            # TODO relative pfade sichern
-            # TODO db umbauen
-
             bar = progressbar.ProgressBar()
             target = None
             target_ = None
             for group in bar(list(chunks(movie.lines, 32))):
                 command = [FFMPEG_BIN,
-                           '-i', movie.video,
+                           '-i', _full_path(movie.video),
                            '-loglevel', 'panic',
                            ]
 
@@ -250,8 +250,7 @@ def analyze_pitches():
     for movie in Movie.select().where(
             Movie.skip_line == True,
             Movie.skip_snippet == True,
-            Movie.skip_pitch == True,
-            Movie.skip_analysis == False):
+            Movie.skip_pitch == True):
 
         print "Analyzing pitches for '%s'" % movie.title
 
@@ -261,17 +260,22 @@ def analyze_pitches():
             with db.transaction():
 
                 if line.pitch is None:
-                    print "No pitch for Line %i in '%s'. Skip.." % (line.id, line.movie.title)
+                    print "No pitch for Line %i in '%s'. Skip.." % (line.start, line.movie.title)
                     continue
 
-                p = line.pitch[1, :]
-                kde = st.gaussian_kde( p[~np.isnan(p)] )
-                locs = np.linspace(50, 400, 100)
-                vals = kde.evaluate(locs)
+                try:
+                    p = line.pitch[1, :]
+                    kde = st.gaussian_kde( p[~np.isnan(p)] )
+                    locs = np.linspace(50, 400, 100)
+                    vals = kde.evaluate(locs)
 
-                peak = locs[ np.argmax(vals) ]
+                    peak = locs[ np.argmax(vals) ]
+                    line.sextimate = peak
 
-                line.sextimate = peak
+                except Exception:
+                    print "Exception during analysis for line at second %i." % line.start
+                    line.sextimate = False
+
                 line.save()
 
 
