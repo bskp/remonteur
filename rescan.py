@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 import os
+import peewee as pw
+from playhouse.fields import PickledField
 import sys
+from shutil import copyfile
 import subprocess
 import progressbar
 
@@ -16,7 +19,7 @@ from scipy import stats as st
 import amfm_decompy.pYAAPT as pYAAPT
 import amfm_decompy.basic_tools as basic
 
-from schema import Line, Movie, db
+import schema
 
 
 #
@@ -24,8 +27,6 @@ from schema import Line, Movie, db
 #
 
 FFMPEG_BIN = 'ffmpeg'
-
-DEFAULT_MOVIES_DIR = 'movies'
 
 SUBTITLE_EXT = '.srt'
 MOVIE_EXT = '.mkv', '.mp4', '.avi'
@@ -35,6 +36,13 @@ IGNORE_LINES = '['
 SNIPPET_MARGIN_BEFORE = 0.2  # seconds
 SNIPPET_MARGIN_AFTER = 0.1  # seconds
 SNIPPET_EXT = '.wav'
+
+
+MOVIES_DIR = '/Volumes/filmton/filme'
+#MOVIES_DIR = 'filme'
+DB_NAME = 'lines.db'
+
+db, Movie, Line = schema.connect( os.path.join(MOVIES_DIR, DB_NAME) )
 
 #
 # Helpers
@@ -50,16 +58,6 @@ def chunks(l, n):
 # Steps
 #
 
-movies_dir = '/Volumes/LORA/filme'
-
-def parse_args():
-    global movies_dir
-    args = sys.argv()
-
-    if len(args) > 1:
-        movies_dir = args[1]
-
-
 def rescan_dir():
     ''' Sync the sqlite DB with the contents of the "movies" directory. '''
 
@@ -68,8 +66,8 @@ def rescan_dir():
     print "Rescanning movie directory..."
 
     # Add all new movies to DB
-    for item in os.listdir(movies_dir):
-        abs_path = os.path.join(movies_dir, item)
+    for item in os.listdir(MOVIES_DIR):
+        abs_path = os.path.join(MOVIES_DIR, item)
         path = item
 
         if os.path.isfile(abs_path):
@@ -170,7 +168,7 @@ def create_snippets():
             print "Creating audio snippets for '%s'" % movie.title
 
             # create snippet folder
-            path = os.path.join(movies_dir, movie.title, 'snippets')
+            path = os.path.join(MOVIES_DIR, movie.title, 'snippets')
             try:
                 os.makedirs(path)
             except OSError:
@@ -237,7 +235,8 @@ def extract_pitches():
                     lp[ pitch.samp_values == 0 ] = np.nan
 
                     line.pitch = np.vstack( (t, lp) )
-                except Exception:
+                except Exception as e:
+                    print e
                     line.pitch = None
 
                 line.save()
@@ -256,11 +255,13 @@ def analyze_pitches():
 
         bar = progressbar.ProgressBar()
         for line in bar( movie.lines.where(Line.sextimate == None,
-                                           Line.pitch != False)):
+                                           Line.pitch != None)):
             with db.transaction():
 
                 if line.pitch is None:
                     print "No pitch for Line %i in '%s'. Skip.." % (line.start, line.movie.title)
+                    line.sextimate = False
+                    line.save()
                     continue
 
                 try:
@@ -279,15 +280,28 @@ def analyze_pitches():
                 line.save()
 
 
+def drop_pitches():
+    db = os.path.join(MOVIES_DIR, DB_NAME)
+    db_light_name = DB_NAME.replace('.', '_light.')
+    db_light = os.path.join(MOVIES_DIR, db_light_name)
+
+    copyfile(db, db_light)
+
+    dbl, _, LineL = schema.connect(db_light)
+    query = LineL.update(pitch=None)
+    query.execute()
+    dbl.execute_sql('VACUUM')
+
+
 def _full_path(target):
-    return os.path.join(movies_dir, target)
+    return os.path.join(MOVIES_DIR, target)
 
 if __name__ == '__main__':
-    # parse_args()
     rescan_dir()
     create_lines()
     create_snippets()
     extract_pitches()
     analyze_pitches()
+    drop_pitches()
 
     os.system('say "Filme fertig verarbeitet!"')

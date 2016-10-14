@@ -1,5 +1,15 @@
 {
+    "name": "filmton",
+    "version": "0.0.1",
+    "description": "gui for the filmton project",
+    "main": "bootstrapper.js",
     "devDependencies": {
+        "babel-cli": "^6.16.0",
+        "babel-plugin-transform-decorators-legacy": "^1.3.4",
+        "babel-preset-es2015": "^6.16.0",
+        "babel-preset-react": "^6.16.0",
+        "babel-preset-stage-1": "^6.16.0",
+        "babel-register": "^6.16.3",
         "electron": "^1.3.4",
         "electron-builder": "^6.3.2"
     },
@@ -7,11 +17,24 @@
         "pack": "build --dir",
         "dist": "build"
     },
+    "babel": {
+        "presets": [
+            "es2015",
+            "stage-1",
+            "react"
+        ],
+        "plugins": [
+            "transform-decorators-legacy"
+        ]
+    },
     "build": {
         "appid": "ee.rezept.filmton",
         "category": "public.app-category.video",
         "win": {
             "iconurl": "(windows-only) https link to icon"
         }
+    },
+    "dependencies": {
+        "babel-plugin-transform-decorators-legacy": "^1.3.4"
     }
 }

@@ -1,7 +1,7 @@
 *.swp
 *.pyc
 env/
-movies*/
+filme*/
 __pycache__
 node_modules
 .sync
