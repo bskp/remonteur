@@ -1,6 +1,7 @@
 import os
 import peewee as pw
 from playhouse.fields import PickledField
+from sqlite3 import OperationalError
 #from playhouse.sqlite_ext import FTS5Model, SearchField
 
 
@@ -11,6 +12,11 @@ def connect(path):
         title = pw.TextField(unique=True)
         subtitles = pw.TextField()
         video = pw.TextField()
+
+        framerate = pw.TextField(null=True)
+        width = pw.IntegerField(null=True)
+        height = pw.IntegerField(null=True)
+        total_duration = pw.FloatField(null=True)
 
         class Meta:
             database = db
@@ -37,7 +43,12 @@ def connect(path):
             primary_key = pw.CompositeKey('movie', 'start')
             database = db
 
+
     db.connect()
+
+    if not Movie.table_exists() and not Line.table_exists():
+        db.create_tables([Movie, Line])
+
     return db, Movie, Line
 
 

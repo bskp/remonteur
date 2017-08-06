@@ -1,11 +1,11 @@
-AMFM-decompy==1.0.4
-Cython==0.24.1
-aubio==0.4.4alpha-libaubio
+AMFM-decompy==1.0.7
 audioread==2.1.4
 caffeine==0.5
 chardet==2.3.0
 cycler==0.10.0
+Cython==0.24.1
 decorator==4.0.10
+functools32==3.2.3.post2
 joblib==0.10.0
 librosa==0.4.3
 matplotlib==1.5.2
@@ -21,4 +21,4 @@ resampy==0.1.4
 scikit-learn==0.17.1
 scipy==0.18.0
 six==1.10.0
-wsgiref==0.1.2
+subprocess32==3.2.7
