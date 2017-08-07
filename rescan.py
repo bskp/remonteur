@@ -28,7 +28,7 @@ FFMPEG_BIN = 'ffmpeg'
 FFPROBE_BIN = 'ffprobe'
 
 SUBTITLE_EXT = '.srt'
-SUB_LANGUAGE = 'eng'
+SUB_LANGUAGE = 'deu'
 MOVIE_EXT = '.mkv', '.mp4', '.avi'
 
 IGNORE_LINES = '['

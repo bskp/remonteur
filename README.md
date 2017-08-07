@@ -1,13 +1,15 @@
 remonteur
 ========
 
--- Filmemashups per Sprechtext
+*Filmemashups per Sprechtext*
+
+![remonteur Screenshot](screenshot.png)
 
 Gui-Benutzung
 ---------
-Keine Installation notwendig!
+Ziehe die remonteur-App in den Ordner mit dem ``filme/``-Baum (siehe unten) und doppelklicke, um zu beginnen.
 
-### Zum Bearbeiten der Exportieren ``fcpxml``-Dateien eignen sich
+Zum Bearbeiten der exportierten ``fcpxml``-Dateien eignen sich:
  
 - Final Cut Pro
 - daVinci Resolve
@@ -21,22 +23,23 @@ Filme auf Mac einlesen
 
 *Homebrew* kann das schnell und einfach erledigen (MacOs-Paketmanager). [Auf der Website](https://brew.sh) steht alles Notwendige zur Installation. Sobald diese abgeschlossen ist:
 
-1. Installiere ffmpeg mit
-    - ``$ brew install python ffmpeg``
+1. Installiere Python und ffmpeg mit
+    - ``$ brew install python2 ffmpeg``
 
 2. *Nur für Liebhaber*: Erstellen einer [virtuellen Umgebung](https://virtualenv.pypa.io/) per
-    - ``$ virtualenv env``
+    - ``$ virtualenv -p `which python2` env ``
     - ``$ source env/bin/activate``
     
 
 2. Installiere alles benötigten Python-Module in einem Rutsch mit:
-    - ``$ pip install -r requirements.txt``
+    - ``$ pip2 install -r requirements.txt``
 
     
 ### Filme sammeln
 Das Tool erwartet einen Ordner, in welchem für jeden Film ein Unterordner existiert. Darin befinden sich der Film selbst (.mkv, .mp4 oder .avi) und - falls bereits vorhanden - eine Untertitel-Datei.
 
-- Filme/
+- remonteur (GUI, für Verarbeitung nicht benötigt)
+- filme/
    - Pocahontas/ 
      - pocahontas.mkv
      - pocahontas.srt

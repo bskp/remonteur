@@ -1,7 +1,7 @@
 {
-  "name": "filmton",
-  "version": "0.0.1",
-  "description": "gui for the filmton project",
+  "name": "remonteur",
+  "version": "0.0.2",
+  "description": "movie mashups using subtitles",
   "main": "bootstrapper.js",
   "scripts": {
     "start": "electron ."

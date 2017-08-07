@@ -6,6 +6,6 @@ __pycache__
 node_modules
 .sync
 dist/**
-!dist/mac/filmton-0.0.1.dmg
+!dist/mac/*.dmg
 .DS_Store
 .idea/
