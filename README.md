@@ -1,9 +1,15 @@
 remonteur
-========
+=========
 
 *Filmemashups per Sprechtext*
 
 ![remonteur Screenshot](screenshot.png)
+
+- Volltextsuche in den Dialogen aller Filme der Sammlung
+- Anhören per Klick
+- Eingefärbt nach Stimm-Höhe (oder was auch immer für die Stimme gehalten wird…)
+- Neu-Arrangierung per Drag-n-Drop
+- Export als Final-Cut-XML-Projekt für den Feinschnitt
 
 Gui-Benutzung
 ---------
@@ -15,28 +21,28 @@ Zum Bearbeiten der exportierten ``fcpxml``-Dateien eignen sich:
 - daVinci Resolve
 
 
-Filme auf Mac einlesen
-------------
+Filmsammlung erstellen
+--------------
 
 
-### Benötigte Kommandozeilen-Tools installieren
+### Installation
 
-*Homebrew* kann das schnell und einfach erledigen (MacOs-Paketmanager). [Auf der Website](https://brew.sh) steht alles Notwendige zur Installation. Sobald diese abgeschlossen ist:
+Zum Verarbeiten der Filme werden ein paar Kommandozeilen-Tools benötigt. *Homebrew* kann das schnell und einfach erledigen. [Auf der Website](https://brew.sh) steht alles Notwendige zur Installation. Sobald diese abgeschlossen ist:
 
-1. Installiere Python und ffmpeg mit
+1. Installiere *Python* und *ffmpeg* mit
     - ``$ brew install python2 ffmpeg``
 
-2. *Nur für Liebhaber*: Erstellen einer [virtuellen Umgebung](https://virtualenv.pypa.io/) per
+2. **Für Liebhaber**: Erstellen einer [virtuellen Umgebung](https://virtualenv.pypa.io/) per
     - ``$ virtualenv -p `which python2` env ``
     - ``$ source env/bin/activate``
     
 
-2. Installiere alles benötigten Python-Module in einem Rutsch mit:
+2. Installiere alle benötigten Python-Module in einem Rutsch mit:
     - ``$ pip2 install -r requirements.txt``
 
     
 ### Filme sammeln
-Das Tool erwartet einen Ordner, in welchem für jeden Film ein Unterordner existiert. Darin befinden sich der Film selbst (.mkv, .mp4 oder .avi) und - falls bereits vorhanden - eine Untertitel-Datei.
+Das Tool erwartet ein Verzeichnis, in dem für jeden Film ein Unterordner existiert. Darin befinden sich der Film selbst (.mkv, .mp4 oder .avi) und - falls bereits vorhanden - eine Untertitel-Datei.
 
 - remonteur (GUI, für Verarbeitung nicht benötigt)
 - filme/
@@ -55,7 +61,11 @@ Das Tool erwartet einen Ordner, in welchem für jeden Film ein Unterordner exist
 ``./rescan.py <Filme-Verzeichnis>``
 
 - Setzt automatisch fort, wenn unterbrochen wird
-- ``./check.py`` zeigt den Zustand der Datenbank an
+- Lädt fehlende Untertitel herunter
+
+  > **Achtung!** Am besten noch während der Verarbeitung prüfen, ob das Timing der Untertitel stimmt.
+  
+- ``./check.py <Filme-Verzeichnis>`` zeigt den Zustand der Datenbank an
 
 Entwickeln
 ==========
