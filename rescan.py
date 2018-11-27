@@ -215,7 +215,7 @@ def create_snippets():
 
             # create snippet folder
             path_from_root = os.path.join(movie.title, 'snippets')
-            path = os.path.join(movies_dir, path_from_root)
+            path = _full_path(path_from_root)
             try:
                 os.makedirs(path)
             except OSError:
@@ -249,7 +249,7 @@ def create_snippets():
                                         SNIPPET_MARGIN_AFTER),
                         '-vn',
                         '-ac', '1',
-                        _full_path(target),
+                        target,
                     ]
 
                 print subprocess.check_output( command )
@@ -407,7 +407,7 @@ if __name__ == '__main__':
         sys.exit(1)
     
     movies_dir = sys.argv[1]
-
+    
     check_db()
     rescan_dir()
     movie_metadata()

@@ -1,4 +1,4 @@
-AMFM-decompy==1.0.7
+AMFM-decompy==1.0.8.1
 audioread==2.1.4
 caffeine==0.5
 chardet==2.3.0

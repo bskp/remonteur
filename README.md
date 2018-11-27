@@ -27,24 +27,28 @@ Filmsammlung erstellen
 
 ### Installation
 
-Zum Verarbeiten der Filme werden ein paar Kommandozeilen-Tools benötigt. *Homebrew* kann das schnell und einfach erledigen. [Auf der Website](https://brew.sh) steht alles Notwendige zur Installation. Sobald diese abgeschlossen ist:
+Zum Verarbeiten der Filme werden ein paar Kommandozeilen-Tools benötigt. *Homebrew* kann die schnell und einfach installieren. [Auf der Website](https://brew.sh) steht alles Notwendige zur Installation. Sobald diese abgeschlossen ist:
 
 1. Installiere *Python* und *ffmpeg* mit
     - ``$ brew install python2 ffmpeg``
 
-2. **Für Liebhaber**: Erstellen einer [virtuellen Umgebung](https://virtualenv.pypa.io/) per
+2. Auschecken
+	- ``$ git clone git@github.com:bskp/remonteur.git``
+	- ``$ cd remonteur``
+
+3. **Für Liebhaber**: Erstellen einer [virtuellen Umgebung](https://virtualenv.pypa.io/) per
     - ``$ virtualenv -p `which python2` env ``
     - ``$ source env/bin/activate``
     
 
-2. Installiere alle benötigten Python-Module in einem Rutsch mit:
+4. Installiere alle benötigten Python-Module in einem Rutsch mit:
     - ``$ pip2 install -r requirements.txt``
 
     
 ### Filme sammeln
 Das Tool erwartet ein Verzeichnis, in dem für jeden Film ein Unterordner existiert. Darin befinden sich der Film selbst (.mkv, .mp4 oder .avi) und - falls bereits vorhanden - eine Untertitel-Datei.
 
-- remonteur (GUI, für Verarbeitung nicht benötigt)
+- remonteur.app (GUI, für Verarbeitung nicht benötigt)
 - filme/
    - Pocahontas/ 
      - pocahontas.mkv

@@ -11,9 +11,6 @@ import progressbar
 
 
 import schema
-#MOVIES_DIR = '/Volumes/filmton/filmton/filme'
-MOVIES_DIR = '/Users/matthiasroggo/Desktop/filmdb/filme'
-#MOVIES_DIR = 'filme'
 DB_NAME = 'lines.db'
 
 movies_dir = sys.argv[1]
@@ -22,7 +19,9 @@ db, Movie, Line = schema.connect( os.path.join(movies_dir, DB_NAME) )
 
         
 def _full_path(target):
-    return os.path.join(MOVIES_DIR, target)
+    if target == None:
+        target = ''
+    return os.path.join(movies_dir, target)
 
 print "{:20s}                         | Video Sub Lines  Wav   None  False".format(str(Movie.select().count()) + " Movies")
 print "---------------------------------------------+-----------------------------------"
