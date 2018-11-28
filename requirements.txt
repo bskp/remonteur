@@ -1,7 +1,7 @@
 AMFM-decompy==1.0.8.1
 audioread==2.1.4
 caffeine==0.5
-chardet==2.3.0
+chardet==3.0.4
 cycler==0.10.0
 Cython==0.24.1
 decorator==4.0.10

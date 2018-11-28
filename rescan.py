@@ -54,6 +54,15 @@ def chunks(l, n):
 # Steps
 #
 
+def check_binaries():
+    bins = FFMPEG_BIN, FFPROBE_BIN
+    for bin in bins:
+        if subprocess.call(['which', bin]) is not 0:
+            print "%s is not installed. Please install using brew:" % bin
+            print "\tbrew install %s\n" % bin
+            sys.exit()
+    print  # newline.
+
 
 def check_db():
     global db, Movie, Line
@@ -343,8 +352,6 @@ def extract_and_analyze_pitches():
                     signal = basic.SignalObj( _full_path(line.audio) )
                     pitch = pYAAPT.yaapt(signal)
 
-                    t = pitch.frames_pos / signal.fs
-
                     # Gaussian filter
                     kern = sg.gaussian(20, 2)
                     lp = sg.filtfilt( kern, np.sum(kern), pitch.samp_interp )
@@ -407,6 +414,8 @@ if __name__ == '__main__':
         sys.exit(1)
     
     movies_dir = sys.argv[1]
+
+    check_binaries()
     
     check_db()
     rescan_dir()
@@ -419,5 +428,3 @@ if __name__ == '__main__':
     extract_and_analyze_pitches()  # does all three steps above
 
     print "Done."
-    os.system('say "Filme fertig verarbeitet!"')
-
